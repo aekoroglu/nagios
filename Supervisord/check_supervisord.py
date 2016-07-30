@@ -38,7 +38,7 @@ def superv_state(state):
     elif state == 'FATAL':
         return 'CRITICAL'
     else:
-        return 'UNKOWN'
+        return 'UNKNOWN'
 
 def time_diff_text(diff):
     if diff.days >= 1:

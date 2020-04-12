@@ -77,12 +77,14 @@ def get_state(process, state, desc, now, start, warning, critical, time):
 def get_info(server,port,username,password,process,warning,critical,time):
     try:
         if server is None and port is None:
-            print ('Server and port is required')
+            print ('Server IP address or hostname and TCP port is required')
             sys.exit(2)
         elif process is None:
-            print ('Process is required')
+            print ('Process name is required')
             sys.exit(2)
-        
+        if time  not in {'second', 'minute', 'hour', 'day'}:
+            print ('Time unit should be second, minute, hour or day')
+            sys.exit(2)
         if username is None and password is None:
             uri = 'http://%s:%s/RPC2' % (server,port)
         else:

@@ -33,11 +33,11 @@ def superv_state(state):
 def get_state(process, state, desc, now, start, warning, critical, time):
     tdiff = now - start
     if time == 'minute':
-        proc_upt = round(tdiff/60,2)
+        proc_upt = round(tdiff/60)
     elif time == 'hour':
-        proc_upt = round(tdiff/3600,2)
+        proc_upt = round(tdiff/3600)
     elif time == 'day':
-        proc_upt = round(tdiff/86400,2)
+        proc_upt = round(tdiff/86400)
     else:
         proc_upt = tdiff
 

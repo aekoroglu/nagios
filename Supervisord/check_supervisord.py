@@ -15,7 +15,7 @@ def superv_state(state):
     if state == 'RUNNING':
         return 'OK'
     elif state == 'STOPPED':
-        return 'WARNING'
+        return 'CRITICAL'
     elif state == 'STOPPING':
         return 'WARNING'
     elif state == 'STARTING':
@@ -30,7 +30,7 @@ def superv_state(state):
         return 'UNKNOWN'
 
 
-def get_state(process, state, desc, now, start, warning, critical, time):
+def get_state(process, state, state_desc, desc, now, start, warning, critical, time):
     tdiff = now - start
     if time == 'minute':
         proc_upt = round(tdiff/60)
@@ -42,36 +42,58 @@ def get_state(process, state, desc, now, start, warning, critical, time):
         proc_upt = tdiff
 
     if warning is None and critical is None:
-        print ('%s %s: %s | uptime=%s;;;' % (process, state, desc, proc_upt))
-        sys.exit(0)
-    elif critical is None:
-        if proc_upt <= warning:
-            print('%s WARNING : %s | uptime=%s;%s;;' % (process, desc, proc_upt, warning))
+        if state == 'WARNING':
+            print('%s WARNING : %s' % (process, state_desc))
             sys.exit(1)
-        else:
-            print ('%s %s: %s | uptime=%s;%s;;' % (process, state, desc, proc_upt, warning))
-            sys.exit(0)
-    elif warning is None:
-        if proc_upt < critical:
-            print('%s CRITICAL : %s | uptime=%s;;%s;' % (process, desc, proc_upt, critical))
+        elif state == 'CRITICAL':
+            print('%s CRITICAL : %s' % (process, state_desc))
             sys.exit(2)
         else:
-            print ('%s %s: %s | uptime=%s;;%s;' % (process, state, desc, proc_upt, critical))
+            print ('%s %s: %s | uptime=%s;;;' % (process, state, desc, proc_upt))
             sys.exit(0)
+    elif critical is None:
+        if proc_upt <= warning:
+            print('%s WARNING : %s | uptime=%s;%s;;' % (process, state_desc, proc_upt, warning))
+            sys.exit(1)
+        else:
+            if state == 'CRITICAL':
+                print('%s CRITICAL : %s' % (process, state_desc))
+                sys.exit(2)
+            else:
+                print ('%s %s: %s | uptime=%s;%s;;' % (process, state, desc, proc_upt, warning))
+                sys.exit(0)
+    elif warning is None:
+        if proc_upt < critical:
+            print('%s CRITICAL : %s | uptime=%s;;%s;' % (process, state_desc, proc_upt, critical))
+            sys.exit(2)
+        else:
+            if state == 'CRITICAL':
+                print('%s CRITICAL : %s' % (process, state_desc))
+                sys.exit(2)
+            else:
+                print ('%s %s: %s | uptime=%s;;%s;' % (process, state, desc, proc_upt, critical))
+                sys.exit(0)
     else:
         if warning <= critical:
             print ('CRITICAL : Warning value can not be less than or equal to critical')
             sys.exit(2)
         else:
             if proc_upt < critical:
-                print('%s CRITICAL : %s | uptime=%s;%s;%s;' % (process, desc, proc_upt, warning, critical))
+                print('%s CRITICAL : %s | uptime=%s;%s;%s;' % (process, state_desc, proc_upt, warning, critical))
                 sys.exit(2)
             elif proc_upt <= warning:
-                print('%s WARNING : %s | uptime=%s;%s;%s;' % (process, desc, proc_upt, warning, critical))
+                print('%s WARNING : %s | uptime=%s;%s;%s;' % (process, state_desc, proc_upt, warning, critical))
                 sys.exit(1)
             else:
-                print ('%s %s: %s | uptime=%s;%s;%s;' % (process, state, desc, proc_upt, warning, critical))
-                sys.exit(0)
+                if state == 'WARNING':
+                    print('%s WARNING : %s | uptime=%s;%s;;' % (process, state_desc, proc_upt, warning))
+                    sys.exit(1)
+                elif state == 'CRITICAL':
+                    print('%s CRITICAL : %s' % (process, state_desc))
+                    sys.exit(2)
+                else:
+                    print ('%s %s: %s | uptime=%s;%s;%s;' % (process, state, desc, proc_upt, warning, critical))
+                    sys.exit(0)
 
 
 def get_info(server,port,username,password,process,warning,critical,time):
@@ -93,10 +115,11 @@ def get_info(server,port,username,password,process,warning,critical,time):
         server = ServerProxy(uri)
         proc_info = server.supervisor.getProcessInfo(process)
         proc_state = superv_state(proc_info['statename'])
+        proc_state_desc = proc_info['statename']
         proc_desc = proc_info['description']
         proc_now = proc_info['now']
         proc_start = proc_info['start']
-        get_state(process, proc_state, proc_desc, proc_now, proc_start, warning, critical, time)
+        get_state(process, proc_state, proc_state_desc, proc_desc, proc_now, proc_start, warning, critical, time)
     except Exception as e:
         print('CRITICAL : %s' % e)
         sys.exit(2)

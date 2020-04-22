@@ -79,10 +79,10 @@ def get_state(process, state, state_desc, desc, now, start, warning, critical, t
             sys.exit(2)
         else:
             if proc_upt < critical:
-                print('%s CRITICAL : %s | uptime=%s;%s;%s;' % (process, state_desc, proc_upt, warning, critical))
+                print('%s CRITICAL : %s, %s | uptime=%s;%s;%s;' % (process, state_desc, desc, proc_upt, warning, critical))
                 sys.exit(2)
             elif proc_upt <= warning:
-                print('%s WARNING : %s | uptime=%s;%s;%s;' % (process, state_desc, proc_upt, warning, critical))
+                print('%s WARNING : %s, %s | uptime=%s;%s;%s;' % (process, state_desc, desc, proc_upt, warning, critical))
                 sys.exit(1)
             else:
                 if state == 'WARNING':

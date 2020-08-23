@@ -1,7 +1,7 @@
 Nagios
 =========
 
-Nagios releated tools..
+Nagios related tools..
 
 Supervisord  : check_supervisord nagios plugin<br>
 Changes for Ver2.1<br>
